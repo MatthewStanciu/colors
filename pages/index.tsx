@@ -2,8 +2,13 @@ import type { NextPage } from 'next'
 import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
+import { useOthers, useUpdateMyPresence } from '@liveblocks/react'
 
 const Home: NextPage = () => {
+  const others = useOthers()
+  const otherCursors = others.map((user) => user.presence?.cursor)
+  const updateMyPresence = useUpdateMyPresence()
+
   return (
     <div className={styles.container}>
       <Head>
@@ -13,43 +18,37 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h1 className={styles.title}>
-          Welcome to <a href="https://nextjs.org">Next.js!</a>
-        </h1>
-
         <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>pages/index.tsx</code>
+          There {others.count === 1 ? 'is' : 'are'} {others.count}{' '}
+          {others.count === 1 ? 'other' : 'others'} with you in the room right
+          now.
         </p>
 
-        <div className={styles.grid}>
-          <a href="https://nextjs.org/docs" className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js features and API.</p>
-          </a>
-
-          <a href="https://nextjs.org/learn" className={styles.card}>
-            <h2>Learn &rarr;</h2>
-            <p>Learn about Next.js in an interactive course with quizzes!</p>
-          </a>
-
-          <a
-            href="https://github.com/vercel/next.js/tree/canary/examples"
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Discover and deploy boilerplate example Next.js projects.</p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>
-              Instantly deploy your Next.js site to a public URL with Vercel.
-            </p>
-          </a>
+        <div
+          style={{ width: '1000px', height: '580px', border: '2px solid gold' }}
+          onPointerMove={(e) => {
+            updateMyPresence({ cursor: { x: e.clientX, y: e.clientY } })
+            console.log(e.clientX, e.clientX)
+          }}
+        >
+          {otherCursors.map(
+            (cursor) =>
+              cursor && (
+                <svg
+                  width={50}
+                  height={50}
+                  viewBox="0 0 50 50"
+                  style={{
+                    position: 'absolute',
+                    left: cursor.x,
+                    top: cursor.y,
+                    transform: 'translate(-50%, -50%)'
+                  }}
+                >
+                  <circle cx="25" cy="25" r="8" />
+                </svg>
+              )
+          )}
         </div>
       </main>
 
